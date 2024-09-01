@@ -1,6 +1,7 @@
 package edu.ucne.composeregistroprioridadesap2
 
 import android.os.Bundle
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -142,8 +143,8 @@ class MainActivity : ComponentActivity() {
                                     errorMessage = "La descripción no puede estar vacía"
                                 else if(diasCompromiso.isBlank())
                                     errorMessage = "Días de compromiso no puede ir vacío"
-                                else if(diasCompromiso.toInt() <= 0)
-                                    errorMessage = "Días de compromiso no puede ser menor a 1"
+                                else if(diasCompromiso.toInt() <= 0 || diasCompromiso.toInt() > 30)
+                                    errorMessage = "Días de compromiso no puede ser menor a 1 o mayor a 30"
 
                                 else{
                                     scope.launch {
@@ -181,6 +182,7 @@ class MainActivity : ComponentActivity() {
                         minActiveState = Lifecycle.State.STARTED,
                         initialValue = emptyList()
                     )
+                Spacer(modifier = Modifier.height(20.dp))
                 PrioridadListScreen(prioridadList)
             }
         }
@@ -194,7 +196,33 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxWidth()
         ){
             Spacer(modifier = Modifier.height(32.dp))
-            Text("Lista de Prioridades")
+            Text(
+                text = "Lista de Prioridades",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier
+            ){
+                Text(
+                    text = "Id",
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Descripción",
+                    modifier = Modifier.weight(2f),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Días de Compromiso",
+                    modifier = Modifier.weight(2f),
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
@@ -231,8 +259,8 @@ class MainActivity : ComponentActivity() {
         prioridadDb.prioridadDao().save(prioridad)
     }
 
-    private suspend fun findPrioridad(descripcion: String){
-        prioridadDb.prioridadDao().findDescripcion(descripcion)
+    private suspend fun findPrioridad(descripcion: String): PrioridadEntity? {
+        return prioridadDb.prioridadDao().findDescripcion(descripcion)
     }
 
     @Composable
