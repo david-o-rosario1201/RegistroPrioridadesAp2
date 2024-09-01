@@ -147,14 +147,21 @@ class MainActivity : ComponentActivity() {
 
                                 else{
                                     scope.launch {
-                                        savePrioridad(
-                                            PrioridadEntity(
-                                                descripcion = descripcion,
-                                                diasCompromiso = diasCompromiso.toInt()
+                                        if(findPrioridad(descripcion) != null)
+                                        {
+                                            errorMessage = "Ya existe esta descripción"
+                                        }
+
+                                        else{
+                                            savePrioridad(
+                                                PrioridadEntity(
+                                                    descripcion = descripcion,
+                                                    diasCompromiso = diasCompromiso.toInt()
+                                                )
                                             )
-                                        )
-                                        descripcion = ""
-                                        diasCompromiso = ""
+                                            descripcion = ""
+                                            diasCompromiso = ""
+                                        }
                                     }
                                 }
                             }
@@ -222,6 +229,10 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun savePrioridad(prioridad: PrioridadEntity){
         prioridadDb.prioridadDao().save(prioridad)
+    }
+
+    private suspend fun findPrioridad(descripcion: String){
+        prioridadDb.prioridadDao().findDescripcion(descripcion)
     }
 
     @Composable
