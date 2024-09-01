@@ -5,15 +5,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -33,6 +37,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.room.Room
 import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
@@ -56,10 +63,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             RegistroPrioridadesAp2Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ){
+                        PrioridadScreen()
+                    }
                 }
             }
         }
@@ -157,8 +167,57 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                val lifecycleOwner = LocalLifecycleOwner.current
+                val prioridadList by prioridadDb.prioridadDao().getAll()
+                    .collectAsStateWithLifecycle(
+                        lifecycleOwner = lifecycleOwner,
+                        minActiveState = Lifecycle.State.STARTED,
+                        initialValue = emptyList()
+                    )
+                PrioridadListScreen(prioridadList)
             }
         }
+    }
+
+    @Composable
+    fun PrioridadListScreen(
+        prioridadList: List<PrioridadEntity>
+    ){
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Lista de Prioridades")
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ){
+                items(prioridadList){
+                    PrioridadRow(it = it)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun PrioridadRow(it: PrioridadEntity){
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text(
+                text = it.prioridadId.toString(),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = it.descripcion,
+                modifier = Modifier.weight(2f)
+            )
+            Text(
+                text = it.diasCompromiso.toString(),
+                modifier = Modifier.weight(2f)
+            )
+        }
+        HorizontalDivider()
     }
 
     private suspend fun savePrioridad(prioridad: PrioridadEntity){
