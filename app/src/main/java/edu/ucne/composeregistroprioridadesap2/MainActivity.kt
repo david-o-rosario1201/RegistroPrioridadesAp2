@@ -17,9 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -45,6 +48,7 @@ import androidx.room.Room
 import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -183,13 +187,14 @@ class MainActivity : ComponentActivity() {
                         initialValue = emptyList()
                     )
                 Spacer(modifier = Modifier.height(20.dp))
-                PrioridadListScreen(prioridadList)
+                PrioridadListScreen(scope,prioridadList)
             }
         }
     }
 
     @Composable
     fun PrioridadListScreen(
+        scope: CoroutineScope,
         prioridadList: List<PrioridadEntity>
     ){
         Column(
@@ -199,8 +204,12 @@ class MainActivity : ComponentActivity() {
             Text(
                 text = "Lista de Prioridades",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(
+                    alignment = Alignment.CenterHorizontally
+                )
             )
+            HorizontalDivider()
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -218,24 +227,36 @@ class MainActivity : ComponentActivity() {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Días de Compromiso",
+                    text = "     Días de Compromiso",
                     modifier = Modifier.weight(2f),
                     fontWeight = FontWeight.Bold
                 )
+                Text(
+                    text = "",
+                    modifier = Modifier.weight(0.3f),
+                    fontWeight = FontWeight.Bold
+                )
             }
+
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ){
                 items(prioridadList){
-                    PrioridadRow(it = it)
+                    PrioridadRow(
+                        scope = scope,
+                        it = it
+                    )
                 }
             }
         }
     }
 
     @Composable
-    fun PrioridadRow(it: PrioridadEntity){
+    fun PrioridadRow(
+        scope: CoroutineScope,
+        it: PrioridadEntity
+    ){
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){
@@ -249,8 +270,26 @@ class MainActivity : ComponentActivity() {
             )
             Text(
                 text = it.diasCompromiso.toString(),
-                modifier = Modifier.weight(2f)
+                modifier = Modifier.weight(1f)
             )
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        deletePrioridad(
+                            PrioridadEntity(
+                                prioridadId = it.prioridadId,
+                                descripcion = it.descripcion,
+                                diasCompromiso = it.diasCompromiso
+                            )
+                        )
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar prioridad"
+                )
+            }
         }
         HorizontalDivider()
     }
@@ -261,6 +300,10 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun findPrioridad(descripcion: String): PrioridadEntity? {
         return prioridadDb.prioridadDao().findDescripcion(descripcion)
+    }
+
+    private suspend fun deletePrioridad(prioridad: PrioridadEntity){
+        prioridadDb.prioridadDao().delete(prioridad)
     }
 
     @Composable
