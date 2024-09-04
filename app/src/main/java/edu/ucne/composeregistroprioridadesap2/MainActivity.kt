@@ -306,14 +306,6 @@ class MainActivity : ComponentActivity() {
         prioridadDb.prioridadDao().delete(prioridad)
     }
 
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
-    }
-
     @Preview(showBackground = true, showSystemUi = true)
     @Composable
     fun GreetingPreview() {
