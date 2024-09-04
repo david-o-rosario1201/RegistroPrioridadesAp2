@@ -1,7 +1,6 @@
 package edu.ucne.composeregistroprioridadesap2
 
 import android.os.Bundle
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -38,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -308,7 +306,7 @@ class MainActivity : ComponentActivity() {
 
     @Preview(showBackground = true, showSystemUi = true)
     @Composable
-    fun GreetingPreview() {
+    fun PrioridadScreenPreview() {
         RegistroPrioridadesAp2Theme {
            PrioridadScreen()
         }
