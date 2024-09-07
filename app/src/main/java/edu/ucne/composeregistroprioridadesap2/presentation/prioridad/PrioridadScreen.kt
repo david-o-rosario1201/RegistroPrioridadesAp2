@@ -2,7 +2,9 @@
 
 package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,7 +53,22 @@ fun PrioridadScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Registro Prioridades")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        Text(
+                            text = "Prioridades",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(
+                                    end = 50.dp
+                                )
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(
@@ -70,7 +87,7 @@ fun PrioridadScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(8.dp)
+                .padding(15.dp)
         ){
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth()
@@ -78,14 +95,14 @@ fun PrioridadScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    Text(
-                        text = "Prioridades",
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold
-                    )
+//                    Text(
+//                        text = "Prioridades",
+//                        style = MaterialTheme.typography.displaySmall,
+//                        fontWeight = FontWeight.Bold
+//                    )
                     OutlinedTextField(
                         label = {
                             Text("Descripción")
