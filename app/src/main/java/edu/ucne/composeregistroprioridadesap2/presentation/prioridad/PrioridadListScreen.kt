@@ -2,6 +2,7 @@
 
 package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,12 +20,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
 import kotlinx.coroutines.CoroutineScope
@@ -44,9 +47,14 @@ fun PrioridadListScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ){
-                        Text(text = "Prioridades")
+                        Text(
+                            text = "Prioridades",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             )
@@ -65,6 +73,10 @@ fun PrioridadListScreen(
         Column(
             modifier = Modifier.fillMaxSize()
                 .padding(it)
+                .padding(
+                    start = 15.dp,
+                    end = 15.dp
+                )
         ){
             Spacer(modifier = Modifier.height(32.dp))
 
