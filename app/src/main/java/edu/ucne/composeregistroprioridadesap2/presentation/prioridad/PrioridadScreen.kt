@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,17 +36,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
+import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun PrioridadScreen(
+    id: Int = 0,
+    prioridadDb: PrioridadDb,
     scope: CoroutineScope,
     goPrioridadList: () -> Unit
 ){
     var descripcion by remember { mutableStateOf("") }
     var diasCompromiso by remember { mutableStateOf("") }
     var errorMessage: String? by remember { mutableStateOf(null) }
+
+    var prioridad by remember { mutableStateOf<PrioridadEntity?>(null) }
+
+    LaunchedEffect(key1 = true) {
+        prioridad = finPrioridad(
+            prioridadDb = prioridadDb,
+            id = id
+        )
+        descripcion = prioridad?.descripcion ?: ""
+        diasCompromiso = prioridad?.diasCompromiso?.toString() ?: "0"
+    }
+
+
+    Text("Este es el id = ${prioridad?.prioridadId.toString()}")
 
 
     Scaffold(
@@ -98,11 +117,6 @@ fun PrioridadScreen(
                         .padding(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-//                    Text(
-//                        text = "Prioridades",
-//                        style = MaterialTheme.typography.displaySmall,
-//                        fontWeight = FontWeight.Bold
-//                    )
                     OutlinedTextField(
                         label = {
                             Text("Descripción")
@@ -147,23 +161,27 @@ fun PrioridadScreen(
 
                             else{
                                 scope.launch {
-//                                    if(findPrioridad(descripcion) != null)
-//                                    {
-//                                        errorMessage = "Ya existe esta descripción"
-//                                    }
-//
-//                                    else{
-//                                        savePrioridad(
-//                                            PrioridadEntity(
-//                                                descripcion = descripcion,
-//                                                diasCompromiso = diasCompromiso.toInt()
-//                                            )
-//                                        )
-//                                        descripcion = ""
-//                                        diasCompromiso = ""
-//
-//                                        goPrioridadList()
-//                                    }
+                                    val validarDescripcion = findDescripcion(
+                                        prioridadDb = prioridadDb,
+                                        descripcion = descripcion
+                                    )
+                                    if (validarDescripcion != null && validarDescripcion.prioridadId != prioridad?.prioridadId){
+                                        errorMessage = "Ya existe esta descripción"
+                                    }
+                                    else{
+                                        savePrioridad(
+                                            prioridadDb = prioridadDb,
+                                            PrioridadEntity(
+                                                prioridadId = prioridad?.prioridadId,
+                                                descripcion = descripcion,
+                                                diasCompromiso = diasCompromiso.toInt()
+                                            )
+                                        )
+                                        descripcion = ""
+                                        diasCompromiso = ""
+
+                                        goPrioridadList()
+                                    }
                                 }
                             }
                         }
@@ -176,15 +194,28 @@ fun PrioridadScreen(
                     }
                 }
             }
-//                val lifecycleOwner = LocalLifecycleOwner.current
-//                val prioridadList by prioridadDb.prioridadDao().getAll()
-//                    .collectAsStateWithLifecycle(
-//                        lifecycleOwner = lifecycleOwner,
-//                        minActiveState = Lifecycle.State.STARTED,
-//                        initialValue = emptyList()
-//                    )
-//                Spacer(modifier = Modifier.height(20.dp))
-            //PrioridadListScreen(scope,prioridadList)
         }
     }
 }
+
+suspend fun savePrioridad(
+    prioridadDb: PrioridadDb,
+    prioridad: PrioridadEntity
+){
+    prioridadDb.prioridadDao().save(prioridad)
+}
+
+private suspend fun findDescripcion(
+    prioridadDb: PrioridadDb,
+    descripcion: String
+): PrioridadEntity? {
+    return prioridadDb.prioridadDao().findDescripcion(descripcion)
+}
+
+private suspend fun finPrioridad(
+    prioridadDb: PrioridadDb,
+    id: Int
+) : PrioridadEntity?{
+    return prioridadDb.prioridadDao().find(id)
+}
+
