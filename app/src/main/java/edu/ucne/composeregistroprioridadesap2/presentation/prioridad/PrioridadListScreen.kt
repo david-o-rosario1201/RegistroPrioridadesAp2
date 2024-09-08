@@ -1,7 +1,9 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,17 +29,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import edu.ucne.composeregistroprioridadesap2.R
+import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun PrioridadListScreen(
+    prioridadDb: PrioridadDb,
     scope: CoroutineScope,
     prioridadList: List<PrioridadEntity>,
-    onAddPrioridad: () -> Unit
+    onAddPrioridad: () -> Unit,
+    onPrioridadClick: (PrioridadEntity) -> Unit
 ){
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +78,8 @@ fun PrioridadListScreen(
         }
     ){
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(it)
                 .padding(
                     start = 15.dp,
@@ -84,11 +92,34 @@ fun PrioridadListScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ){
-                items(prioridadList){
-                    PrioridadRow(
-                        it = it,
-                        scope = scope
-                    )
+                if(prioridadList.isEmpty()){
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillParentMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ){
+                            Image(
+                                painter = painterResource(R.drawable.empty_icon),
+                                contentDescription = "Lista vacía"
+                            )
+                            Text(
+                                text = "Lista vacía",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }else{
+                    items(prioridadList){
+                        PrioridadRow(
+                            prioridadDb = prioridadDb,
+                            it = it,
+                            scope = scope,
+                            onPrioridadClick = onPrioridadClick
+                        )
+                    }
                 }
             }
         }
@@ -97,11 +128,19 @@ fun PrioridadListScreen(
 
 @Composable
 fun PrioridadRow(
+    prioridadDb: PrioridadDb,
     scope: CoroutineScope,
-    it: PrioridadEntity
+    it: PrioridadEntity,
+    onPrioridadClick: (PrioridadEntity) -> Unit
 ){
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable(
+                onClick = {
+                    onPrioridadClick(it)
+                }
+            )
     ){
         Text(
             text = it.prioridadId.toString(),
@@ -118,13 +157,14 @@ fun PrioridadRow(
         IconButton(
             onClick = {
                 scope.launch {
-//                    deletePrioridad(
-//                        PrioridadEntity(
-//                            prioridadId = it.prioridadId,
-//                            descripcion = it.descripcion,
-//                            diasCompromiso = it.diasCompromiso
-//                        )
-//                    )
+                    deletePrioridad(
+                        prioridadDb = prioridadDb,
+                        PrioridadEntity(
+                            prioridadId = it.prioridadId,
+                            descripcion = it.descripcion,
+                            diasCompromiso = it.diasCompromiso
+                        )
+                    )
                 }
             }
         ) {
@@ -135,4 +175,11 @@ fun PrioridadRow(
         }
     }
     HorizontalDivider()
+}
+
+private suspend fun deletePrioridad(
+    prioridadDb: PrioridadDb,
+    prioridad: PrioridadEntity
+){
+    prioridadDb.prioridadDao().delete(prioridad)
 }
