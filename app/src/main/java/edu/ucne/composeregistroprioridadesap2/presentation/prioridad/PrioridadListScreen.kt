@@ -112,6 +112,39 @@ fun PrioridadListScreen(
                         }
                     }
                 }else{
+
+                    item{
+                        //Spacer(modifier = Modifier.height(32.dp))
+                        HorizontalDivider()
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier
+                        ){
+                            Text(
+                                text = "Id",
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Descripción",
+                                modifier = Modifier.weight(2f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "     Días de Compromiso",
+                                modifier = Modifier.weight(2f),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "",
+                                modifier = Modifier.weight(0.3f),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
                     items(prioridadList){
                         PrioridadRow(
                             prioridadDb = prioridadDb,
