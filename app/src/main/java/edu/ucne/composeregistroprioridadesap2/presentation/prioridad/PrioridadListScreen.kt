@@ -114,7 +114,6 @@ fun PrioridadListScreen(
                 }else{
 
                     item{
-                        //Spacer(modifier = Modifier.height(32.dp))
                         HorizontalDivider()
 
                         Spacer(modifier = Modifier.height(20.dp))
