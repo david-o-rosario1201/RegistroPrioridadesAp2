@@ -27,24 +27,46 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
-import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun PrioridadListScreen(
-    prioridadDb: PrioridadDb,
-    scope: CoroutineScope,
-    prioridadList: List<PrioridadEntity>,
+    viewModel: PrioridadViewModel = hiltViewModel(),
+    onPrioridadClick: (Int) -> Unit,
+    onAddPrioridad: () -> Unit
+){
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    PrioridadListBodyScreen(
+        uiState = uiState,
+        onPrioridadClick = onPrioridadClick,
+        onAddPrioridad = onAddPrioridad,
+        onDeletePrioridad = { prioridadId ->
+            viewModel.onEvent(
+                PrioridadUiEvent.PrioridadIdChanged(prioridadId)
+            )
+            viewModel.onEvent(
+                PrioridadUiEvent.Delete
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PrioridadListBodyScreen(
+    uiState: PrioridadUiState,
+    onPrioridadClick: (Int) -> Unit,
     onAddPrioridad: () -> Unit,
-    onPrioridadClick: (PrioridadEntity) -> Unit
+    onDeletePrioridad: (Int) -> Unit
 ){
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -92,7 +114,7 @@ fun PrioridadListScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ){
-                if(prioridadList.isEmpty()){
+                if(uiState.prioridades.isEmpty()){
                     item {
                         Column(
                             modifier = Modifier
@@ -144,12 +166,11 @@ fun PrioridadListScreen(
                         }
                     }
 
-                    items(prioridadList){
+                    items(uiState.prioridades){
                         PrioridadRow(
-                            prioridadDb = prioridadDb,
                             it = it,
-                            scope = scope,
-                            onPrioridadClick = onPrioridadClick
+                            onPrioridadClick = onPrioridadClick,
+                            onDeletePrioridad = onDeletePrioridad
                         )
                     }
                 }
@@ -160,17 +181,16 @@ fun PrioridadListScreen(
 
 @Composable
 fun PrioridadRow(
-    prioridadDb: PrioridadDb,
-    scope: CoroutineScope,
     it: PrioridadEntity,
-    onPrioridadClick: (PrioridadEntity) -> Unit
+    onPrioridadClick: (Int) -> Unit,
+    onDeletePrioridad: (Int) -> Unit
 ){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clickable(
                 onClick = {
-                    onPrioridadClick(it)
+                    onPrioridadClick(it.prioridadId ?: 0)
                 }
             )
     ){
@@ -188,16 +208,7 @@ fun PrioridadRow(
         )
         IconButton(
             onClick = {
-                scope.launch {
-                    deletePrioridad(
-                        prioridadDb = prioridadDb,
-                        PrioridadEntity(
-                            prioridadId = it.prioridadId,
-                            descripcion = it.descripcion,
-                            diasCompromiso = it.diasCompromiso
-                        )
-                    )
-                }
+                onDeletePrioridad(it.prioridadId ?: 0)
             }
         ) {
             Icon(
@@ -207,11 +218,4 @@ fun PrioridadRow(
         }
     }
     HorizontalDivider()
-}
-
-private suspend fun deletePrioridad(
-    prioridadDb: PrioridadDb,
-    prioridad: PrioridadEntity
-){
-    prioridadDb.prioridadDao().delete(prioridad)
 }
