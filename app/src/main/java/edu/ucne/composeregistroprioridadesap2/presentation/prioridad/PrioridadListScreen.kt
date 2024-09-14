@@ -32,11 +32,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
+import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 
 @Composable
 fun PrioridadListScreen(
@@ -218,4 +220,15 @@ fun PrioridadRow(
         }
     }
     HorizontalDivider()
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PrioridadListScreenPreview(){
+    RegistroPrioridadesAp2Theme {
+        PrioridadListScreen(
+            onPrioridadClick = {},
+            onAddPrioridad = {}
+        )
+    }
 }

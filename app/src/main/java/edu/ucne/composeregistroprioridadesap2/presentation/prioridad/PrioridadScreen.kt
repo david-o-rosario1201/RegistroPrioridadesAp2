@@ -32,9 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 
 @Composable
 fun PrioridadScreen(
@@ -161,5 +163,16 @@ fun PrioridadBodyScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PrioridadScreenPreview(){
+    RegistroPrioridadesAp2Theme {
+        PrioridadScreen(
+            prioridadId = 0,
+            goPrioridadList = {}
+        )
     }
 }
