@@ -85,6 +85,7 @@ class PrioridadViewModel @Inject constructor(
                     }
                     else{
                         prioridadRepository.save(_uiState.value.toEntity())
+                        _uiState.update { it.copy(success = true) }
                     }
                 }
             }

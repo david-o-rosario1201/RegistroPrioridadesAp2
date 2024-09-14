@@ -58,8 +58,11 @@ fun PrioridadBodyScreen(
     onEvent: (PrioridadUiEvent) -> Unit,
     goPrioridadList: () -> Unit
 ){
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = true, key2 = uiState.success) {
         onEvent(PrioridadUiEvent.SelectedPrioridad(prioridadId))
+
+        if(uiState.success)
+            goPrioridadList()
     }
 
     Scaffold(
@@ -147,7 +150,6 @@ fun PrioridadBodyScreen(
                     OutlinedButton(
                         onClick = {
                             onEvent(PrioridadUiEvent.Save)
-                            goPrioridadList()
                         }
                     ) {
                         Icon(
