@@ -65,25 +65,26 @@ class PrioridadViewModel @Inject constructor(
             }
             PrioridadUiEvent.Save -> {
                 viewModelScope.launch {
-                    val descripcionEnMinuscula = _uiState.value.descripcion?.lowercase()
-                    val prioridadBuscada = prioridadRepository.findDescripcion(descripcionEnMinuscula ?: "")
+                    val prioridadId = _uiState.value.prioridadId ?: 0
 
-                    if(_uiState.value.descripcion.isNullOrBlank()){
+                    val prioridadBuscada = prioridadRepository.findDescripcion(_uiState.value.descripcion ?: "")
+
+                    if (_uiState.value.descripcion.isNullOrBlank()) {
                         _uiState.update {
                             it.copy(errorMessge = "El campo descripción no puede ir vacío")
                         }
                     }
-                    else if(_uiState.value.diasCompromiso <= 0){
+                    else if (_uiState.value.diasCompromiso <= 0 || _uiState.value.diasCompromiso > 30) {
                         _uiState.update {
                             it.copy(errorMessge = "El campo días de compromiso no puede ser menor a 1 o mayor a 30")
                         }
                     }
-                    else if(prioridadBuscada != null){
+                    else if (prioridadId == 0 && prioridadBuscada != null && prioridadBuscada.prioridadId != 0) {
                         _uiState.update {
                             it.copy(errorMessge = "Ya existe una prioridad con esta descripción")
                         }
                     }
-                    else{
+                    else {
                         prioridadRepository.save(_uiState.value.toEntity())
                         _uiState.update { it.copy(success = true) }
                     }
