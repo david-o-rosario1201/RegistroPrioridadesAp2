@@ -122,9 +122,41 @@ class TicketViewModel @Inject constructor(
                         }
                     }
                     else{
-                        ticketRepository.save(_uiState.value.toEntity())
-                        _uiState.update {
-                            it.copy(success = true)
+                        val isUpdate = _uiState.value.ticketId != null
+
+                        val clienteEnMinuscula = _uiState.value.cliente?.lowercase()
+                        val clienteBuscado = ticketRepository.findCliente(clienteEnMinuscula ?: "")
+
+                        val asuntoEnMinuscula = _uiState.value.asunto?.lowercase()
+                        val asuntoBuscado = ticketRepository.findAsunto(asuntoEnMinuscula ?: "")
+
+                        val descripcionEnMinuscula = _uiState.value.descripcion?.lowercase()
+                        val descripcionBuscado = ticketRepository.findDescripcion(descripcionEnMinuscula ?: "")
+
+                        if (isUpdate) {
+                            ticketRepository.save(_uiState.value.toEntity())
+                            _uiState.update {
+                                it.copy(success = true)
+                            }
+                        } else {
+                            if (clienteBuscado != null) {
+                                _uiState.update {
+                                    it.copy(errorMessage = "Ya existe un ticket con este cliente")
+                                }
+                            } else if (asuntoBuscado != null) {
+                                _uiState.update {
+                                    it.copy(errorMessage = "Ya existe un ticket con este asunto")
+                                }
+                            } else if (descripcionBuscado != null) {
+                                _uiState.update {
+                                    it.copy(errorMessage = "Ya existe un ticket con esta descripción")
+                                }
+                            } else {
+                                ticketRepository.save(_uiState.value.toEntity())
+                                _uiState.update {
+                                    it.copy(success = true)
+                                }
+                            }
                         }
                     }
                 }
