@@ -27,45 +27,45 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
-import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 
 @Composable
 fun PrioridadScreen(
-    id: Int = 0,
-    prioridadDb: PrioridadDb,
-    scope: CoroutineScope,
+    viewModel: PrioridadViewModel = hiltViewModel(),
+    prioridadId: Int,
     goPrioridadList: () -> Unit
 ){
-    var descripcion by remember { mutableStateOf("") }
-    var diasCompromiso by remember { mutableStateOf("") }
-    var errorMessage: String? by remember { mutableStateOf(null) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    PrioridadBodyScreen(
+        prioridadId = prioridadId,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        goPrioridadList = goPrioridadList
+    )
+}
 
-    var prioridad by remember { mutableStateOf<PrioridadEntity?>(null) }
+@Composable
+fun PrioridadBodyScreen(
+    prioridadId: Int,
+    uiState: PrioridadUiState,
+    onEvent: (PrioridadUiEvent) -> Unit,
+    goPrioridadList: () -> Unit
+){
+    LaunchedEffect(key1 = true, key2 = uiState.success) {
+        onEvent(PrioridadUiEvent.SelectedPrioridad(prioridadId))
 
-    LaunchedEffect(key1 = true) {
-        prioridad = finPrioridad(
-            prioridadDb = prioridadDb,
-            id = id
-        )
-        descripcion = prioridad?.descripcion ?: ""
-        diasCompromiso = prioridad?.diasCompromiso?.toString() ?: "0"
+        if(uiState.success)
+            goPrioridadList()
     }
-
-
-    Text("Este es el id = ${prioridad?.prioridadId.toString()}")
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -121,10 +121,9 @@ fun PrioridadScreen(
                         label = {
                             Text("Descripción")
                         },
-                        value = descripcion,
+                        value = uiState.descripcion ?: "",
                         onValueChange = {
-                            descripcion = it
-                            errorMessage = null
+                            onEvent(PrioridadUiEvent.DescripcionChanged(it))
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -132,10 +131,10 @@ fun PrioridadScreen(
                         label = {
                             Text("Días de compromiso")
                         },
-                        value = diasCompromiso,
+                        value = if(uiState.diasCompromiso == 0) "" else uiState.diasCompromiso.toString(),
                         onValueChange = {
-                            diasCompromiso = it
-                            errorMessage = null
+                            val diasCompromiso = it.toIntOrNull() ?: 0
+                            onEvent(PrioridadUiEvent.DiasCompromisoChanged(diasCompromiso.toString()))
                         },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
@@ -143,7 +142,7 @@ fun PrioridadScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    errorMessage?.let {
+                    uiState.errorMessge?.let {
                         Text(
                             text = it,
                             color = Color.Red
@@ -152,38 +151,7 @@ fun PrioridadScreen(
 
                     OutlinedButton(
                         onClick = {
-                            if(descripcion.isBlank())
-                                errorMessage = "La descripción no puede estar vacía"
-                            else if(diasCompromiso.isBlank())
-                                errorMessage = "Días de compromiso no puede ir vacío"
-                            else if(diasCompromiso.toInt() <= 0 || diasCompromiso.toInt() > 30)
-                                errorMessage = "Días de compromiso no puede ser menor a 1 o mayor a 30"
-
-                            else{
-                                scope.launch {
-                                    val validarDescripcion = findDescripcion(
-                                        prioridadDb = prioridadDb,
-                                        descripcion = descripcion
-                                    )
-                                    if (validarDescripcion != null && validarDescripcion.prioridadId != prioridad?.prioridadId){
-                                        errorMessage = "Ya existe esta descripción"
-                                    }
-                                    else{
-                                        savePrioridad(
-                                            prioridadDb = prioridadDb,
-                                            PrioridadEntity(
-                                                prioridadId = prioridad?.prioridadId,
-                                                descripcion = descripcion,
-                                                diasCompromiso = diasCompromiso.toInt()
-                                            )
-                                        )
-                                        descripcion = ""
-                                        diasCompromiso = ""
-
-                                        goPrioridadList()
-                                    }
-                                }
-                            }
+                            onEvent(PrioridadUiEvent.Save)
                         }
                     ) {
                         Icon(
@@ -198,24 +166,13 @@ fun PrioridadScreen(
     }
 }
 
-suspend fun savePrioridad(
-    prioridadDb: PrioridadDb,
-    prioridad: PrioridadEntity
-){
-    prioridadDb.prioridadDao().save(prioridad)
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PrioridadScreenPreview(){
+    RegistroPrioridadesAp2Theme {
+        PrioridadScreen(
+            prioridadId = 0,
+            goPrioridadList = {}
+        )
+    }
 }
-
-private suspend fun findDescripcion(
-    prioridadDb: PrioridadDb,
-    descripcion: String
-): PrioridadEntity? {
-    return prioridadDb.prioridadDao().findDescripcion(descripcion)
-}
-
-private suspend fun finPrioridad(
-    prioridadDb: PrioridadDb,
-    id: Int
-) : PrioridadEntity?{
-    return prioridadDb.prioridadDao().find(id)
-}
-
