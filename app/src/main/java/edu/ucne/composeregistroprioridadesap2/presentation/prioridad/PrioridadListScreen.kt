@@ -11,12 +11,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -26,10 +36,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,15 +57,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
 import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun PrioridadListScreen(
+    drawerState: DrawerState,
+    scope: CoroutineScope,
     viewModel: PrioridadViewModel = hiltViewModel(),
     onPrioridadClick: (Int) -> Unit,
     onAddPrioridad: () -> Unit
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     PrioridadListBodyScreen(
+        drawerState = drawerState,
+        scope = scope,
         uiState = uiState,
         onPrioridadClick = onPrioridadClick,
         onAddPrioridad = onAddPrioridad,
@@ -65,6 +89,8 @@ fun PrioridadListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrioridadListBodyScreen(
+    drawerState: DrawerState,
+    scope: CoroutineScope,
     uiState: PrioridadUiState,
     onPrioridadClick: (Int) -> Unit,
     onAddPrioridad: () -> Unit,
@@ -73,18 +99,25 @@ fun PrioridadListBodyScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        Text(
-                            text = "Prioridades",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold
+                    Text(
+                        text = "Lista de Prioridades",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu"
                         )
                     }
                 }
@@ -136,38 +169,6 @@ fun PrioridadListBodyScreen(
                         }
                     }
                 }else{
-
-                    item{
-                        HorizontalDivider()
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        Row(
-                            modifier = Modifier
-                        ){
-                            Text(
-                                text = "Id",
-                                modifier = Modifier.weight(1f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Descripción",
-                                modifier = Modifier.weight(2f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "     Días de Compromiso",
-                                modifier = Modifier.weight(2f),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "",
-                                modifier = Modifier.weight(0.3f),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-
                     items(uiState.prioridades){
                         PrioridadRow(
                             it = it,
@@ -186,47 +187,93 @@ fun PrioridadRow(
     it: PrioridadEntity,
     onPrioridadClick: (Int) -> Unit,
     onDeletePrioridad: (Int) -> Unit
-){
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+) {
+    Card(
+        onClick = {
+            onPrioridadClick(it.prioridadId ?: 0)
+        },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFB0BEC5)
+        ),
         modifier = Modifier
-            .clickable(
-                onClick = {
-                    onPrioridadClick(it.prioridadId ?: 0)
-                }
-            )
-    ){
-        Text(
-            text = it.prioridadId.toString(),
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = it.descripcion,
-            modifier = Modifier.weight(2f)
-        )
-        Text(
-            text = it.diasCompromiso.toString(),
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(
-            onClick = {
-                onDeletePrioridad(it.prioridadId ?: 0)
-            }
+            .padding(top = 20.dp)
+            .fillMaxWidth()
+            .heightIn(min = 160.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Eliminar prioridad"
+            Image(
+                painter = painterResource(R.drawable.priority_image),
+                contentDescription = "Image Prioridad",
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                contentScale = ContentScale.Crop
             )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Id: ${it.prioridadId}",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Descripción: ${it.descripcion}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Text(
+                    text = "Días de compromiso: ${it.diasCompromiso}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    onDeletePrioridad(it.prioridadId ?: 0)
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar Prioridad"
+                )
+            }
         }
     }
-    HorizontalDivider()
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PrioridadListScreenPreview(){
     RegistroPrioridadesAp2Theme {
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+
         PrioridadListScreen(
+            drawerState = drawerState,
+            scope = scope,
             onPrioridadClick = {},
             onAddPrioridad = {}
         )
