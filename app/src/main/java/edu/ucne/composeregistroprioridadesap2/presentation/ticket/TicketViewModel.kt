@@ -96,67 +96,50 @@ class TicketViewModel @Inject constructor(
             }
             TicketUiEvent.Save -> {
                 viewModelScope.launch {
-                    if(_uiState.value.cliente.isNullOrBlank()){
+                    val ticketId = _uiState.value.ticketId ?: 0
+
+                    val clienteBuscado = ticketRepository.findCliente(_uiState.value.cliente ?: "")
+                    val asuntoBuscado = ticketRepository.findAsunto(_uiState.value.asunto ?: "")
+                    val descripcionBuscado = ticketRepository.findDescripcion(_uiState.value.descripcion ?: "")
+
+                    if (_uiState.value.cliente.isNullOrBlank()) {
                         _uiState.update {
                             it.copy(errorMessage = "El campo cliente no puede ir vacío")
                         }
-                    }
-                    else if(_uiState.value.asunto.isNullOrBlank()){
+                    } else if (_uiState.value.asunto.isNullOrBlank()) {
                         _uiState.update {
                             it.copy(errorMessage = "El campo asunto no puede ir vacío")
                         }
-                    }
-                    else if(_uiState.value.fecha == null){
+                    } else if (_uiState.value.fecha == null) {
                         _uiState.update {
                             it.copy(errorMessage = "El campo fecha no puede ir vacío")
                         }
-                    }
-                    else if(_uiState.value.prioriodadId <= 0){
+                    } else if (_uiState.value.prioriodadId <= 0) {
                         _uiState.update {
                             it.copy(errorMessage = "El campo prioridad no puede ir vacío")
                         }
-                    }
-                    else if(_uiState.value.descripcion.isNullOrBlank()){
+                    } else if (_uiState.value.descripcion.isNullOrBlank()) {
                         _uiState.update {
                             it.copy(errorMessage = "El campo descripción no puede ir vacío")
                         }
                     }
-                    else{
-                        val isUpdate = _uiState.value.ticketId != null
-
-                        val clienteEnMinuscula = _uiState.value.cliente?.lowercase()
-                        val clienteBuscado = ticketRepository.findCliente(clienteEnMinuscula ?: "")
-
-                        val asuntoEnMinuscula = _uiState.value.asunto?.lowercase()
-                        val asuntoBuscado = ticketRepository.findAsunto(asuntoEnMinuscula ?: "")
-
-                        val descripcionEnMinuscula = _uiState.value.descripcion?.lowercase()
-                        val descripcionBuscado = ticketRepository.findDescripcion(descripcionEnMinuscula ?: "")
-
-                        if (isUpdate) {
-                            ticketRepository.save(_uiState.value.toEntity())
-                            _uiState.update {
-                                it.copy(success = true)
-                            }
-                        } else {
-                            if (clienteBuscado != null) {
-                                _uiState.update {
-                                    it.copy(errorMessage = "Ya existe un ticket con este cliente")
-                                }
-                            } else if (asuntoBuscado != null) {
-                                _uiState.update {
-                                    it.copy(errorMessage = "Ya existe un ticket con este asunto")
-                                }
-                            } else if (descripcionBuscado != null) {
-                                _uiState.update {
-                                    it.copy(errorMessage = "Ya existe un ticket con esta descripción")
-                                }
-                            } else {
-                                ticketRepository.save(_uiState.value.toEntity())
-                                _uiState.update {
-                                    it.copy(success = true)
-                                }
-                            }
+                    else if (ticketId == 0 && clienteBuscado != null && clienteBuscado.ticketId != 0) {
+                        _uiState.update {
+                            it.copy(errorMessage = "Ya existe un ticket con este nombre de cliente")
+                        }
+                    } else if (ticketId == 0 && asuntoBuscado != null && asuntoBuscado.ticketId != 0) {
+                        _uiState.update {
+                            it.copy(errorMessage = "Ya existe un ticket con este asunto")
+                        }
+                    } else if (ticketId == 0 && descripcionBuscado != null && descripcionBuscado.ticketId != 0) {
+                        _uiState.update {
+                            it.copy(errorMessage = "Ya existe un ticket con esta descripción")
+                        }
+                    }
+                    else {
+                        ticketRepository.save(_uiState.value.toEntity())
+                        _uiState.update {
+                            it.copy(success = true)
                         }
                     }
                 }
