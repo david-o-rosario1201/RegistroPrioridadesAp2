@@ -13,28 +13,28 @@ interface TicketDao {
     suspend fun save(ticket: TicketEntity)
 
     @Query("""
-        SELECT * FROM TICKETS
+        SELECT * FROM Tickets
         WHERE ticketId = :id
         LIMIT 1
     """)
     suspend fun find(id: Int): TicketEntity?
 
     @Query("""
-        SELECT * FROM TICKETS
+        SELECT * FROM Tickets
         WHERE cliente = :cliente
         LIMIT 1
     """)
     suspend fun findCliente(cliente: String): TicketEntity?
 
     @Query("""
-        SELECT * FROM TICKETS
+        SELECT * FROM Tickets
         WHERE asunto = :asunto
         LIMIT 1
     """)
     suspend fun findAsunto(asunto: String): TicketEntity?
 
     @Query("""
-        SELECT * FROM TICKETS
+        SELECT * FROM Tickets
         WHERE descripcion = :descripcion
         LIMIT 1
     """)
@@ -43,6 +43,6 @@ interface TicketDao {
     @Delete
     suspend fun delete(ticket: TicketEntity)
 
-    @Query("SELECT * FROM TICKETS")
+    @Query("SELECT * FROM Tickets")
     fun getAll(): Flow<List<TicketEntity>>
 }
