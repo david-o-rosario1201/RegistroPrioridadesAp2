@@ -23,7 +23,7 @@ interface PrioridadDao {
 
     @Query(
         """
-            SELECT * FROM PRIORIDADES
+            SELECT * FROM Prioridades
             WHERE descripcion = :descripcion
             LIMIT 1
         """
@@ -33,6 +33,6 @@ interface PrioridadDao {
     @Delete
     suspend fun delete(prioridad: PrioridadEntity)
 
-    @Query("SELECT * FROM PRIORIDADES")
+    @Query("SELECT * FROM Prioridades")
     fun getAll(): Flow<List<PrioridadEntity>>
 }
