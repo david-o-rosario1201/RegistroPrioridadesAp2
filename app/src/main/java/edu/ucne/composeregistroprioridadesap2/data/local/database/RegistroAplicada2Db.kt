@@ -15,7 +15,7 @@ import edu.ucne.composeregistroprioridadesap2.data.local.entities.TicketEntity
 )
 
 @TypeConverters(Converters::class)
-abstract class PrioridadDb: RoomDatabase() {
+abstract class RegistroAplicada2Db: RoomDatabase() {
     abstract fun prioridadDao(): PrioridadDao
     abstract fun ticketDao(): TicketDao
 }

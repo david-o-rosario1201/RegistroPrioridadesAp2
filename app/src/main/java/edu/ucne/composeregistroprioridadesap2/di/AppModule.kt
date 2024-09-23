@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import edu.ucne.composeregistroprioridadesap2.data.local.database.PrioridadDb
+import edu.ucne.composeregistroprioridadesap2.data.local.database.RegistroAplicada2Db
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -18,16 +18,16 @@ object AppModule {
     fun providePrioridadDb(@ApplicationContext appContext: Context) =
         Room.databaseBuilder(
             appContext,
-            PrioridadDb::class.java,
-            "Prioridad.db"
+            RegistroAplicada2Db::class.java,
+            "RegistroAplicada2.db"
         ).fallbackToDestructiveMigration()
             .build()
 
     @Provides
     @Singleton
-    fun providePrioridadDao(prioridadDb: PrioridadDb) = prioridadDb.prioridadDao()
+    fun providePrioridadDao(registroAplicada2Db: RegistroAplicada2Db) = registroAplicada2Db.prioridadDao()
 
     @Provides
     @Singleton
-    fun provideTicketDao(prioridadDb: PrioridadDb) = prioridadDb.ticketDao()
+    fun provideTicketDao(cualquiervainaDb: RegistroAplicada2Db) = cualquiervainaDb.ticketDao()
 }
