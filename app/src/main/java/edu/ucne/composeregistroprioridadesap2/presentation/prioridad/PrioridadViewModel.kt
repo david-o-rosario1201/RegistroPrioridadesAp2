@@ -1,9 +1,10 @@
 package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.PrioridadDto
 import edu.ucne.composeregistroprioridadesap2.data.repository.PrioridadRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,10 +25,14 @@ class PrioridadViewModel @Inject constructor(
 
     private fun getPrioridades(){
         viewModelScope.launch {
-            prioridadRepository.getPrioridades().collect(){ prioridades ->
+            try {
+                val prioridades = prioridadRepository.getPrioridades()
                 _uiState.update {
                     it.copy(prioridades = prioridades)
                 }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error obteniendo prioridades: ${e.message}", e)
+                e.printStackTrace()  // Esto mostrará el stack trace completo en el log
             }
         }
     }
@@ -41,12 +46,18 @@ class PrioridadViewModel @Inject constructor(
             }
             is PrioridadUiEvent.DescripcionChanged -> {
                 _uiState.update {
-                    it.copy(descripcion = event.descripcion)
+                    it.copy(
+                        descripcion = event.descripcion,
+                        errorDescripcion = ""
+                    )
                 }
             }
             is PrioridadUiEvent.DiasCompromisoChanged -> {
                 _uiState.update {
-                    it.copy(diasCompromiso = event.diasCompromiso.toInt())
+                    it.copy(
+                        diasCompromiso = event.diasCompromiso.toInt(),
+                        errorDiasCompromiso = ""
+                    )
                 }
             }
             is PrioridadUiEvent.SelectedPrioridad -> {
@@ -55,9 +66,9 @@ class PrioridadViewModel @Inject constructor(
                         val prioridad = prioridadRepository.getPrioridadById(event.prioridadId)
                         _uiState.update {
                             it.copy(
-                                prioridadId = prioridad?.prioridadId,
-                                descripcion = prioridad?.descripcion,
-                                diasCompromiso = prioridad?.diasCompromiso ?: 0
+                                prioridadId = prioridad.prioridadId,
+                                descripcion = prioridad.descripcion,
+                                diasCompromiso = prioridad.diasCompromiso
                             )
                         }
                     }
@@ -65,40 +76,48 @@ class PrioridadViewModel @Inject constructor(
             }
             PrioridadUiEvent.Save -> {
                 viewModelScope.launch {
-                    val prioridadId = _uiState.value.prioridadId ?: 0
+                    val prioridadBuscada = prioridadRepository.getPrioridades()
+                        .filter { prioridad ->
+                            prioridad.descripcion.contains(_uiState.value.descripcion.toString())
+                        }
 
-                    val prioridadBuscada = prioridadRepository.findDescripcion(_uiState.value.descripcion ?: "")
+                    if(_uiState.value.descripcion.isNullOrEmpty()){
+                        _uiState.update {
+                            it.copy(errorDescripcion = "Este campo no puede estar vacío")
+                        }
+                    }
+                    else if(prioridadBuscada.isNotEmpty()){
+                        _uiState.update {
+                            it.copy(errorDescripcion = "Ya existe una prioridad con esta descripción")
+                        }
+                    }
 
-                    if (_uiState.value.descripcion.isNullOrBlank()) {
+                    if(_uiState.value.diasCompromiso == 0){
                         _uiState.update {
-                            it.copy(errorMessge = "El campo descripción no puede ir vacío")
+                            it.copy(errorDiasCompromiso = "Este campo no puede estar vacío")
                         }
                     }
-                    else if (_uiState.value.diasCompromiso <= 0 || _uiState.value.diasCompromiso > 30) {
+                    else if(_uiState.value.diasCompromiso < 1 || _uiState.value.diasCompromiso > 30){
                         _uiState.update {
-                            it.copy(errorMessge = "El campo días de compromiso no puede ser menor a 1 o mayor a 30")
+                            it.copy(errorDiasCompromiso = "El mínimo de días es 1 y el máximo es 30")
                         }
                     }
-                    else if (prioridadId == 0 && prioridadBuscada != null && prioridadBuscada.prioridadId != 0) {
-                        _uiState.update {
-                            it.copy(errorMessge = "Ya existe una prioridad con esta descripción")
-                        }
-                    }
-                    else {
+
+                    if(_uiState.value.errorDescripcion == "" && _uiState.value.errorDiasCompromiso == ""){
                         prioridadRepository.save(_uiState.value.toEntity())
                         _uiState.update { it.copy(success = true) }
                     }
                 }
             }
             PrioridadUiEvent.Delete -> {
-                viewModelScope.launch {
-                    prioridadRepository.delete(_uiState.value.toEntity())
-                }
+//                viewModelScope.launch {
+//                    prioridadRepository.delete(_uiState.value.toEntity())
+//                }
             }
         }
     }
 
-    fun PrioridadUiState.toEntity() = PrioridadEntity(
+    fun PrioridadUiState.toEntity() = PrioridadDto(
         prioridadId = prioridadId,
         descripcion = descripcion ?: "",
         diasCompromiso = diasCompromiso
