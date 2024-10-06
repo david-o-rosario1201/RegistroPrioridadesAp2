@@ -8,14 +8,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,10 +36,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,7 +76,8 @@ fun PrioridadBodyScreen(
     goPrioridadList: () -> Unit
 ){
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
-
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     LaunchedEffect(key1 = true, key2 = uiState.success) {
         onEvent(PrioridadUiEvent.SelectedPrioridad(prioridadId))
 
@@ -128,62 +135,115 @@ fun PrioridadBodyScreen(
                         .padding(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    OutlinedTextField(
-                        label = {
-                            Text("Descripción")
-                        },
-                        value = uiState.descripcion ?: "",
-                        onValueChange = {
-                            onEvent(PrioridadUiEvent.DescripcionChanged(it))
-                        },
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .onGloballyPositioned { coordinates ->
-                                textFieldSize = coordinates.size.toSize()
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = {
+                                Text("Descripción")
                             },
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    OutlinedTextField(
-                        label = {
-                            Text("Días de compromiso")
-                        },
-                        value = if(uiState.diasCompromiso == 0) "" else uiState.diasCompromiso.toString(),
-                        onValueChange = {
-                            val diasCompromiso = it.toIntOrNull() ?: 0
-                            onEvent(PrioridadUiEvent.DiasCompromisoChanged(diasCompromiso.toString()))
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        ),
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .onGloballyPositioned { coordinates ->
-                                textFieldSize = coordinates.size.toSize()
+                            value = uiState.descripcion ?: "",
+                            onValueChange = {
+                                onEvent(PrioridadUiEvent.DescripcionChanged(it))
                             },
-                        shape = RoundedCornerShape(10.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    uiState.errorMessge?.let {
-                        Text(
-                            text = it,
-                            color = Color.Red
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .focusRequester(focusRequester)
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = {
+                                    focusManager.moveFocus(
+                                        FocusDirection.Next
+                                    )
+                                }
+                            )
                         )
+                        uiState.errorDescripcion?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
                     }
 
-                    OutlinedButton(
-                        onClick = {
-                            onEvent(PrioridadUiEvent.Save)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Guardar Prioridad"
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = {
+                                Text("Días de compromiso")
+                            },
+                            value = if(uiState.diasCompromiso == 0) "" else uiState.diasCompromiso.toString(),
+                            onValueChange = {
+                                val diasCompromiso = it.toIntOrNull() ?: 0
+                                onEvent(PrioridadUiEvent.DiasCompromisoChanged(diasCompromiso.toString()))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Number
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                    onEvent(PrioridadUiEvent.Save)
+                                }
+                            )
                         )
-                        Text("Guardar")
+                        uiState.errorDiasCompromiso?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        OutlinedButton(
+                            onClick = {
+                                focusRequester.requestFocus()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Create,
+                                contentDescription = "Empezar formulario"
+                            )
+                            Text("Empezar a llenar")
+                        }
+
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        OutlinedButton(
+                            onClick = {
+                                onEvent(PrioridadUiEvent.Save)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Guardar Prioridad"
+                            )
+                            Text("Guardar")
+                        }
                     }
                 }
             }
