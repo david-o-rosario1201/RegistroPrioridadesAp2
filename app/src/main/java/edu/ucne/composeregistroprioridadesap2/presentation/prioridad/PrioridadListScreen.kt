@@ -192,7 +192,7 @@ fun PrioridadRow(
         modifier = Modifier
             .padding(top = 20.dp)
             .fillMaxWidth()
-            .heightIn(min = 160.dp)
+            .heightIn(min = 100.dp)
     ) {
         Row(
             modifier = Modifier
@@ -217,19 +217,6 @@ fun PrioridadRow(
                     .weight(1f)
                     .padding(end = 8.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Id: ${it.prioridadId}",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = "Descripción: ${it.descripcion}",
                     style = MaterialTheme.typography.bodyLarge
