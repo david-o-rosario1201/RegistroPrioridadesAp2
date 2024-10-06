@@ -11,8 +11,8 @@ interface PrioridadesApi {
     suspend fun getPrioridad(@Path("prioridadId") prioridadId: Int): PrioridadDto
 
     @GET("api/Prioridades")
-    suspend fun getPrioridades(): List<PrioridadDto>
+    suspend fun getAll(): List<PrioridadDto>
 
     @POST("api/Prioridades")
-    suspend fun savePrioridad(@Body prioridadDto: PrioridadDto?): PrioridadDto
+    suspend fun save(@Body prioridadDto: PrioridadDto?): PrioridadDto
 }
