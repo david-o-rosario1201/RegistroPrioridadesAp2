@@ -1,6 +1,6 @@
 package edu.ucne.composeregistroprioridadesap2.data.repository
 
-import edu.ucne.composeregistroprioridadesap2.data.remote.PrioridadesApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.api.PrioridadesApi
 import edu.ucne.composeregistroprioridadesap2.data.remote.dto.PrioridadDto
 import javax.inject.Inject
 

@@ -7,10 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.composeregistroprioridadesap2.data.local.database.DateAdapter
-import edu.ucne.composeregistroprioridadesap2.data.remote.ClientesApi
-import edu.ucne.composeregistroprioridadesap2.data.remote.PrioridadesApi
-import edu.ucne.composeregistroprioridadesap2.data.remote.SistemasApi
-import edu.ucne.composeregistroprioridadesap2.data.remote.TicketsApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.api.ClientesApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.api.PrioridadesApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.api.SistemasApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.api.TicketsApi
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
@@ -31,7 +31,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesPrioridadesApi(moshi: Moshi): PrioridadesApi{
+    fun providesPrioridadesApi(moshi: Moshi): PrioridadesApi {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -41,7 +41,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesSistemasApi(moshi: Moshi): SistemasApi{
+    fun providesSistemasApi(moshi: Moshi): SistemasApi {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -51,7 +51,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesClientesApi(moshi: Moshi): ClientesApi{
+    fun providesClientesApi(moshi: Moshi): ClientesApi {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -61,7 +61,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesTicketsApi(moshi: Moshi): TicketsApi{
+    fun providesTicketsApi(moshi: Moshi): TicketsApi {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
