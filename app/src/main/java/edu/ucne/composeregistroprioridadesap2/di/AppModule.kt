@@ -1,33 +1,71 @@
 package edu.ucne.composeregistroprioridadesap2.di
 
-import android.content.Context
-import androidx.room.Room
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import edu.ucne.composeregistroprioridadesap2.data.local.database.RegistroAplicada2Db
+import edu.ucne.composeregistroprioridadesap2.data.local.database.DateAdapter
+import edu.ucne.composeregistroprioridadesap2.data.remote.ClientesApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.PrioridadesApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.SistemasApi
+import edu.ucne.composeregistroprioridadesap2.data.remote.TicketsApi
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
 object AppModule {
-    @Provides
+
+    const val BASE_URL = "https://migrartareas-api.azurewebsites.net/"
+
     @Singleton
-    fun providePrioridadDb(@ApplicationContext appContext: Context) =
-        Room.databaseBuilder(
-            appContext,
-            RegistroAplicada2Db::class.java,
-            "RegistroAplicada2.db"
-        ).fallbackToDestructiveMigration()
+    @Provides
+    fun provideMoshi(): Moshi =
+        Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .add(DateAdapter())
             .build()
 
     @Provides
     @Singleton
-    fun providePrioridadDao(registroAplicada2Db: RegistroAplicada2Db) = registroAplicada2Db.prioridadDao()
+    fun providesPrioridadesApi(moshi: Moshi): PrioridadesApi{
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(PrioridadesApi::class.java)
+    }
 
     @Provides
     @Singleton
-    fun provideTicketDao(cualquiervainaDb: RegistroAplicada2Db) = cualquiervainaDb.ticketDao()
+    fun providesSistemasApi(moshi: Moshi): SistemasApi{
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SistemasApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providesClientesApi(moshi: Moshi): ClientesApi{
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ClientesApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providesTicketsApi(moshi: Moshi): TicketsApi{
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(TicketsApi::class.java)
+    }
 }
