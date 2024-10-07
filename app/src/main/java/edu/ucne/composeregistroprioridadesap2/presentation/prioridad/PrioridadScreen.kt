@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -97,7 +98,7 @@ fun PrioridadBodyScreen(
                         horizontalArrangement = Arrangement.Center
                     ){
                         Text(
-                            text = "Prioridades",
+                            text = if(prioridadId == 0) "Crear Prioridad" else "Modificar Prioridad",
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
@@ -239,10 +240,12 @@ fun PrioridadBodyScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Add,
+                                imageVector = if(prioridadId == 0) Icons.Default.Add else Icons.Default.Done,
                                 contentDescription = "Guardar Prioridad"
                             )
-                            Text("Guardar")
+                            Text(
+                                text = if(prioridadId == 0) "Crear Prioridad" else "Modificar Prioridad"
+                            )
                         }
                     }
                 }
