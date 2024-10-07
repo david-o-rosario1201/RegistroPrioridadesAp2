@@ -27,6 +27,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import edu.ucne.composeregistroprioridadesap2.NavigationItem
 import edu.ucne.composeregistroprioridadesap2.Route
+import edu.ucne.composeregistroprioridadesap2.presentation.cliente.ClienteListScreen
+import edu.ucne.composeregistroprioridadesap2.presentation.cliente.ClienteScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.home.HomeScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.prioridad.PrioridadListScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.prioridad.PrioridadScreen
@@ -70,6 +72,8 @@ fun RegistroPrioridadesAp2NavHost(
                                 navHostController.navigate(Screen.TicketListScreen)
                             if(item.route == Route.SISTEMA)
                                 navHostController.navigate(Screen.SistemaListScreen)
+                            if(item.route == Route.CLIENTE)
+                                navHostController.navigate(Screen.ClienteListScreen)
                             selectedItemIndex = index
                             scope.launch {drawerState.close()}
                         },
@@ -168,6 +172,27 @@ fun RegistroPrioridadesAp2NavHost(
                     sistemaId = sistemaId,
                     goSistemas = {
                         navHostController.navigate(Screen.SistemaListScreen)
+                    }
+                )
+            }
+            composable<Screen.ClienteListScreen> {
+                ClienteListScreen(
+                    drawerState = drawerState,
+                    scope = scope,
+                    onClickCliente = { clienteId ->
+                        navHostController.navigate(Screen.ClienteScreen(clienteId))
+                    },
+                    onAddCliente = {
+                        navHostController.navigate(Screen.ClienteScreen(0))
+                    }
+                )
+            }
+            composable<Screen.ClienteScreen> { argumento ->
+                val clienteId = argumento.toRoute<Screen.ClienteScreen>().clienteId
+                ClienteScreen(
+                    clienteId = clienteId,
+                    goClientes = {
+                        navHostController.navigate(Screen.ClienteListScreen)
                     }
                 )
             }
