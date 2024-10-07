@@ -44,10 +44,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 
 @Composable
 fun SistemaScreen(
@@ -193,5 +195,16 @@ fun SistemaBodyScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SistemaScreenPreview(){
+    RegistroPrioridadesAp2Theme {
+        SistemaScreen(
+            sistemaId = 0,
+            goSistemas = {}
+        )
     }
 }
