@@ -30,6 +30,8 @@ import edu.ucne.composeregistroprioridadesap2.Route
 import edu.ucne.composeregistroprioridadesap2.presentation.home.HomeScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.prioridad.PrioridadListScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.prioridad.PrioridadScreen
+import edu.ucne.composeregistroprioridadesap2.presentation.sistema.SistemaListScreen
+import edu.ucne.composeregistroprioridadesap2.presentation.sistema.SistemaScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.ticket.TicketListScreen
 import edu.ucne.composeregistroprioridadesap2.presentation.ticket.TicketScreen
 import kotlinx.coroutines.launch
@@ -64,8 +66,10 @@ fun RegistroPrioridadesAp2NavHost(
                                 navHostController.navigate(Screen.HomeScreen)
                             if(item.route == Route.PRIORIDAD)
                                 navHostController.navigate(Screen.PrioridadListScreen)
-                            else if(item.route == Route.TICKET)
+                            if(item.route == Route.TICKET)
                                 navHostController.navigate(Screen.TicketListScreen)
+                            if(item.route == Route.SISTEMA)
+                                navHostController.navigate(Screen.SistemaListScreen)
                             selectedItemIndex = index
                             scope.launch {drawerState.close()}
                         },
@@ -143,6 +147,27 @@ fun RegistroPrioridadesAp2NavHost(
                         navHostController.navigate(
                             Screen.TicketListScreen
                         )
+                    }
+                )
+            }
+            composable<Screen.SistemaListScreen> {
+                SistemaListScreen(
+                    drawerState = drawerState,
+                    scope = scope,
+                    onClickSistema = { sistemaId ->
+                        navHostController.navigate(Screen.SistemaScreen(sistemaId))
+                    },
+                    onAddSistema = {
+                        navHostController.navigate(Screen.SistemaScreen(0))
+                    }
+                )
+            }
+            composable<Screen.SistemaScreen> { argumento ->
+                val sistemaId = argumento.toRoute<Screen.SistemaScreen>().sistemaId
+                SistemaScreen(
+                    sistemaId = sistemaId,
+                    goSistemas = {
+                        navHostController.navigate(Screen.SistemaListScreen)
                     }
                 )
             }
