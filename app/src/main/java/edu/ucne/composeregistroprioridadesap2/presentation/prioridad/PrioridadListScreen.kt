@@ -219,12 +219,12 @@ fun PrioridadRow(
             ) {
                 Text(
                     text = "Descripción: ${it.descripcion}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 Text(
                     text = "Días de compromiso: ${it.diasCompromiso}",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
 
