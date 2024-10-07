@@ -1,7 +1,8 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package edu.ucne.composeregistroprioridadesap2.presentation.ticket
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,14 +50,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
-import edu.ucne.composeregistroprioridadesap2.data.local.entities.PrioridadEntity
-import edu.ucne.composeregistroprioridadesap2.data.local.entities.TicketEntity
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.ClienteDto
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.PrioridadDto
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.SistemaDto
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.TicketDto
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@SuppressLint("NewApi")
 @Composable
 fun TicketListScreen(
     drawerState: DrawerState,
@@ -74,7 +78,7 @@ fun TicketListScreen(
         onAddTicket = onAddTicket,
         onDeleteTicket = { ticketId ->
             viewModel.onEvent(
-                TicketUiEvent.ticketIdChanged(ticketId)
+                TicketUiEvent.TicketIdChanged(ticketId)
             )
             viewModel.onEvent(TicketUiEvent.Delete)
         }
@@ -167,6 +171,8 @@ fun TicketListBodyScreen(
                         TicketRow(
                             it = it,
                             prioridades = uiState.prioridades,
+                            sistemas = uiState.sistemas,
+                            clientes = uiState.clientes,
                             onTicketClick = onTicketClick,
                             onDeleteTicket = onDeleteTicket
                         )
@@ -179,8 +185,10 @@ fun TicketListBodyScreen(
 
 @Composable
 fun TicketRow(
-    it: TicketEntity,
-    prioridades: List<PrioridadEntity>,
+    it: TicketDto,
+    prioridades: List<PrioridadDto>,
+    sistemas: List<SistemaDto>,
+    clientes: List<ClienteDto>,
     onTicketClick: (Int) -> Unit,
     onDeleteTicket: (Int) -> Unit
 ) {
@@ -188,7 +196,15 @@ fun TicketRow(
 
     val descripcionPrioridad = prioridades.find { prioridad ->
         prioridad.prioridadId == it.prioridadId
-    }?.descripcion ?: "Sin Prioridad"
+    }?.descripcion ?: ""
+
+    val descripcionSistema = sistemas.find { sistema ->
+        sistema.sistemaId == it.sistemaId
+    }?.nombre ?: ""
+
+    val descripcionCliente = clientes.find { cliente ->
+        cliente.clienteId == it.clienteId
+    }?.nombre ?: ""
 
     Card(
         onClick = {
@@ -229,34 +245,41 @@ fun TicketRow(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Id: ${it.ticketId}",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Cliente: $descripcionCliente",
+                        style = MaterialTheme.typography.bodyLarge
                     )
+
                     Text(
-                        text = "Fecha: " + it.fecha?.let { dateFormat.format(it) }.toString(),
+                        text = "Fecha: " + it.fecha.let { dateFormat.format(it) }.toString(),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Prioridad: ${descripcionPrioridad}",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
-                    text = "Cliente: ${it.cliente}",
+                    text = "Sistema: $descripcionSistema",
                     style = MaterialTheme.typography.bodyLarge
                 )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "Prioridad: $descripcionPrioridad",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "Solicitado Por: ${it.solicitadoPor}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+
                 Text(
                     text = "Asunto: ${it.asunto}",
                     style = MaterialTheme.typography.bodyLarge
                 )
+                Spacer(modifier = Modifier.height(5.dp))
+
                 Text(
                     text = "Descripción: ${it.descripcion}",
                     style = MaterialTheme.typography.bodyLarge
