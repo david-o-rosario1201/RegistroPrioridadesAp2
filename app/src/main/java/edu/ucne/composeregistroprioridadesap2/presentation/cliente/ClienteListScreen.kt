@@ -1,6 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
-package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
+package edu.ucne.composeregistroprioridadesap2.presentation.cliente
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,54 +48,44 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
-import edu.ucne.composeregistroprioridadesap2.data.remote.dto.PrioridadDto
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.ClienteDto
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun PrioridadListScreen(
+fun ClienteListScreen(
     drawerState: DrawerState,
     scope: CoroutineScope,
-    viewModel: PrioridadViewModel = hiltViewModel(),
-    onPrioridadClick: (Int) -> Unit,
-    onAddPrioridad: () -> Unit
-){
+    viewModel: ClienteViewModel = hiltViewModel(),
+    onClickCliente: (Int) -> Unit,
+    onAddCliente: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    PrioridadListBodyScreen(
+    ClienteListBodyScreen(
         drawerState = drawerState,
         scope = scope,
         uiState = uiState,
-        onPrioridadClick = onPrioridadClick,
-        onAddPrioridad = onAddPrioridad,
-        onDeletePrioridad = { prioridadId ->
-            viewModel.onEvent(
-                PrioridadUiEvent.PrioridadIdChanged(prioridadId)
-            )
-            viewModel.onEvent(
-                PrioridadUiEvent.Delete
-            )
-        }
+        onClickCliente = onClickCliente,
+        onAddCliente = onAddCliente
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrioridadListBodyScreen(
+fun ClienteListBodyScreen(
     drawerState: DrawerState,
     scope: CoroutineScope,
-    uiState: PrioridadUiState,
-    onPrioridadClick: (Int) -> Unit,
-    onAddPrioridad: () -> Unit,
-    onDeletePrioridad: (Int) -> Unit
-){
+    uiState: ClienteUiState,
+    onClickCliente: (Int) -> Unit,
+    onAddCliente: () -> Unit
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Lista de Prioridades",
+                        text = "Lista de Clientes",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -119,15 +108,15 @@ fun PrioridadListBodyScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddPrioridad
+                onClick = onAddCliente
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Agregar nueva prioridad"
+                    contentDescription = "Agregar nuevo Cliente"
                 )
             }
         }
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -143,7 +132,7 @@ fun PrioridadListBodyScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ){
-                if(uiState.prioridades.isEmpty()){
+                if(uiState.clientes.isEmpty()){
                     item {
                         Column(
                             modifier = Modifier
@@ -163,11 +152,10 @@ fun PrioridadListBodyScreen(
                         }
                     }
                 }else{
-                    items(uiState.prioridades){
-                        PrioridadRow(
+                    items(uiState.clientes){
+                        ClienteRow(
                             it = it,
-                            onPrioridadClick = onPrioridadClick,
-                            onDeletePrioridad = onDeletePrioridad
+                            onClickCliente = onClickCliente
                         )
                     }
                 }
@@ -177,14 +165,13 @@ fun PrioridadListBodyScreen(
 }
 
 @Composable
-fun PrioridadRow(
-    it: PrioridadDto,
-    onPrioridadClick: (Int) -> Unit,
-    onDeletePrioridad: (Int) -> Unit
+fun ClienteRow(
+    it: ClienteDto,
+    onClickCliente: (Int) -> Unit
 ) {
     Card(
         onClick = {
-            onPrioridadClick(it.prioridadId ?: 0)
+            onClickCliente(it.clienteId ?: 0)
         },
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFB0BEC5)
@@ -201,7 +188,7 @@ fun PrioridadRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.priority_image),
+                painter = painterResource(R.drawable.cliente_image),
                 contentDescription = "Image Prioridad",
                 modifier = Modifier
                     .padding(vertical = 20.dp)
@@ -218,27 +205,23 @@ fun PrioridadRow(
                     .padding(end = 8.dp)
             ) {
                 Text(
-                    text = "Descripción: ${it.descripcion}",
+                    text = "Nombre: ${it.nombre}",
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 Text(
-                    text = "Días de compromiso: ${it.diasCompromiso}",
+                    text = "RNC: ${it.rnc}",
                     style = MaterialTheme.typography.titleLarge
                 )
-            }
 
-            IconButton(
-                onClick = {
-                    onDeletePrioridad(it.prioridadId ?: 0)
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar Prioridad"
+                Text(
+                    text = "Email: ${it.email}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Text(
+                    text = "Dirección: ${it.direccion}",
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
@@ -247,16 +230,16 @@ fun PrioridadRow(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PrioridadListScreenPreview(){
+fun ClienteListScreenPreview() {
     RegistroPrioridadesAp2Theme {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
 
-        PrioridadListScreen(
+        ClienteListScreen(
             drawerState = drawerState,
             scope = scope,
-            onPrioridadClick = {},
-            onAddPrioridad = {}
+            onClickCliente = {},
+            onAddCliente = {}
         )
     }
 }

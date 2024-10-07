@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
+package edu.ucne.composeregistroprioridadesap2.presentation.cliente
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,7 +28,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,66 +55,55 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 
 @Composable
-fun PrioridadScreen(
-    viewModel: PrioridadViewModel = hiltViewModel(),
-    prioridadId: Int,
-    goPrioridadList: () -> Unit
-){
+fun ClienteScreen(
+    viewModel: ClienteViewModel = hiltViewModel(),
+    clienteId: Int,
+    goClientes: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    PrioridadBodyScreen(
-        prioridadId = prioridadId,
+    ClienteBodyScreen(
+        clienteId = clienteId,
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        goPrioridadList = goPrioridadList
+        goClientes = goClientes
     )
 }
 
 @Composable
-fun PrioridadBodyScreen(
-    prioridadId: Int,
-    uiState: PrioridadUiState,
-    onEvent: (PrioridadUiEvent) -> Unit,
-    goPrioridadList: () -> Unit
-){
+fun ClienteBodyScreen(
+    clienteId: Int,
+    uiState: ClienteUiState,
+    onEvent: (ClienteUiEvent) -> Unit,
+    goClientes: () -> Unit
+) {
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     LaunchedEffect(key1 = true, key2 = uiState.success) {
-        onEvent(PrioridadUiEvent.SelectedPrioridad(prioridadId))
+        onEvent(ClienteUiEvent.SelectedCliente(clienteId))
 
         if(uiState.success)
-            goPrioridadList()
+            goClientes()
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        Text(
-                            text = if(prioridadId == 0) "Crear Prioridad" else "Modificar Prioridad",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .padding(
-                                    end = 50.dp
-                                )
-                        )
-                    }
+                    Text(
+                        text = if(clienteId == 0) "Crear Cliente" else "Modificar Cliente",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = goPrioridadList
+                        onClick = goClientes
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Lista"
+                            contentDescription = "Ir hacia la lista de Clientes"
                         )
                     }
                 }
@@ -142,11 +131,11 @@ fun PrioridadBodyScreen(
                     ){
                         OutlinedTextField(
                             label = {
-                                Text("Descripción")
+                                Text("Nombre")
                             },
-                            value = uiState.descripcion ?: "",
+                            value = uiState.nombre ?: "",
                             onValueChange = {
-                                onEvent(PrioridadUiEvent.DescripcionChanged(it))
+                                onEvent(ClienteUiEvent.NombreChanged(it))
                             },
                             modifier = Modifier
                                 .padding(15.dp)
@@ -168,7 +157,7 @@ fun PrioridadBodyScreen(
                                 }
                             )
                         )
-                        uiState.errorDescripcion?.let {
+                        uiState.errorNombre?.let {
                             Text(
                                 text = it,
                                 color = Color.Red
@@ -181,12 +170,11 @@ fun PrioridadBodyScreen(
                     ){
                         OutlinedTextField(
                             label = {
-                                Text("Días de compromiso")
+                                Text("RNC")
                             },
-                            value = if(uiState.diasCompromiso == 0) "" else uiState.diasCompromiso.toString(),
+                            value = uiState.rnc ?: "",
                             onValueChange = {
-                                val diasCompromiso = it.toIntOrNull() ?: 0
-                                onEvent(PrioridadUiEvent.DiasCompromisoChanged(diasCompromiso.toString()))
+                                onEvent(ClienteUiEvent.RncChanged(it))
                             },
                             modifier = Modifier
                                 .padding(15.dp)
@@ -197,17 +185,94 @@ fun PrioridadBodyScreen(
                                 },
                             shape = RoundedCornerShape(10.dp),
                             keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done,
+                                imeAction = ImeAction.Next,
                                 keyboardType = KeyboardType.Number
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = {
+                                    focusManager.moveFocus(
+                                        focusDirection = FocusDirection.Next
+                                    )
+                                }
+                            )
+                        )
+                        uiState.errorRNC?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = {
+                                Text("Email")
+                            },
+                            value = uiState.email ?: "",
+                            onValueChange = {
+                                onEvent(ClienteUiEvent.EmailChanged(it))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Email
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = {
+                                    focusManager.moveFocus(
+                                        focusDirection = FocusDirection.Next
+                                    )
+                                }
+                            )
+                        )
+                        uiState.errorEmail?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = {
+                                Text("Dirección")
+                            },
+                            value = uiState.direccion ?: "",
+                            onValueChange = {
+                                onEvent(ClienteUiEvent.DireccionChanged(it))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done
                             ),
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     focusManager.clearFocus()
-                                    onEvent(PrioridadUiEvent.Save)
+                                    onEvent(ClienteUiEvent.Save)
                                 }
                             )
                         )
-                        uiState.errorDiasCompromiso?.let {
+                        uiState.errorDireccion?.let {
                             Text(
                                 text = it,
                                 color = Color.Red
@@ -236,15 +301,15 @@ fun PrioridadBodyScreen(
 
                         OutlinedButton(
                             onClick = {
-                                onEvent(PrioridadUiEvent.Save)
+                                onEvent(ClienteUiEvent.Save)
                             }
                         ) {
                             Icon(
-                                imageVector = if(prioridadId == 0) Icons.Default.Add else Icons.Default.Done,
-                                contentDescription = "Guardar Prioridad"
+                                imageVector = if(clienteId == 0) Icons.Default.Add else Icons.Default.Done,
+                                contentDescription = "Guardar Cliente"
                             )
                             Text(
-                                text = if(prioridadId == 0) "Crear Prioridad" else "Modificar Prioridad"
+                                text = if(clienteId == 0) "Crear Cliente" else "Modificar Cliente"
                             )
                         }
                     }
@@ -256,11 +321,11 @@ fun PrioridadBodyScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PrioridadScreenPreview(){
+private fun ClienteScreenPreview () {
     RegistroPrioridadesAp2Theme {
-        PrioridadScreen(
-            prioridadId = 0,
-            goPrioridadList = {}
+        ClienteScreen(
+            clienteId = 0,
+            goClientes = {}
         )
     }
 }

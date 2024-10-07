@@ -1,24 +1,21 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3Api::class
+)
 
 package edu.ucne.composeregistroprioridadesap2.presentation.ticket
 
-import androidx.compose.foundation.clickable
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,19 +37,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.composeregistroprioridadesap2.presentation.dropdownmenus.DatePickerField
+import edu.ucne.composeregistroprioridadesap2.presentation.dropdownmenus.DropDownMenuClientes
+import edu.ucne.composeregistroprioridadesap2.presentation.dropdownmenus.DropDownMenuPrioridades
+import edu.ucne.composeregistroprioridadesap2.presentation.dropdownmenus.DropDownMenuSistemas
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
+@SuppressLint("NewApi")
 @Composable
 fun TicketScreen(
     viewModel: TicketViewModel = hiltViewModel(),
@@ -78,7 +75,7 @@ fun TicketBodyScreen(
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
     LaunchedEffect(key1 = true, key2 = uiState.success) {
-        onEvent(TicketUiEvent.ticketSelected(ticketId))
+        onEvent(TicketUiEvent.SelectedTicket(ticketId))
 
         if (uiState.success)
             goTicketList()
@@ -91,7 +88,7 @@ fun TicketBodyScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Tickets",
+                        text = if(ticketId == 0) "Crear Ticket" else "Modificar Ticket",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -125,75 +122,148 @@ fun TicketBodyScreen(
                         .padding(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    OutlinedTextField(
-                        label = { Text("Cliente") },
-                        value = uiState.cliente ?: "",
-                        onValueChange = {
-                            onEvent(TicketUiEvent.clienteChanged(it))
-                        },
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .onGloballyPositioned { coordinates ->
-                                textFieldSize = coordinates.size.toSize()
-                            },
-                        shape = RoundedCornerShape(10.dp)
-                    )
 
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        label = { Text("Asunto") },
-                        value = uiState.asunto ?: "",
-                        onValueChange = {
-                            onEvent(TicketUiEvent.asuntoChanged(it))
-                        },
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .onGloballyPositioned { coordinates ->
-                                textFieldSize = coordinates.size.toSize()
-                            },
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    DatePickerField(
-                        uiState = uiState,
-                        onEvent = onEvent
-                    )
-
-                    DropDownMenu(
-                        uiState = uiState,
-                        onEvent = onEvent
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        label = { Text("Descripción") },
-                        value = uiState.descripcion ?: "",
-                        onValueChange = {
-                            onEvent(TicketUiEvent.descripcionChanged(it))
-                        },
-                        modifier = Modifier
-                            .padding(15.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .onGloballyPositioned { coordinates ->
-                                textFieldSize = coordinates.size.toSize()
-                            },
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    uiState.errorMessage?.let {
-                        Text(text = it, color = Color.Red)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        DropDownMenuClientes(
+                            uiState = uiState,
+                            onEvent = onEvent
+                        )
+                        uiState.errorCliente?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
                     }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        DropDownMenuSistemas(
+                            uiState = uiState,
+                            onEvent = onEvent
+                        )
+                        uiState.errorSistema?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = {
+                                Text("Solicitado Por")
+                            },
+                            value = uiState.solicitadoPor ?: "",
+                            onValueChange = {
+                                onEvent(TicketUiEvent.SolicitadoPorChangend(it))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        uiState.errorSolicitadoPor?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = { Text("Asunto") },
+                            value = uiState.asunto ?: "",
+                            onValueChange = {
+                                onEvent(TicketUiEvent.AsuntoChanged(it))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        uiState.errorAsunto?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        DatePickerField(
+                            uiState = uiState,
+                            onEvent = onEvent
+                        )
+                        uiState.errorFecha?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        DropDownMenuPrioridades(
+                            uiState = uiState,
+                            onEvent = onEvent
+                        )
+                        uiState.errorPrioridad?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        OutlinedTextField(
+                            label = { Text("Descripción") },
+                            value = uiState.descripcion ?: "",
+                            onValueChange = {
+                                onEvent(TicketUiEvent.DescripcionChanged(it))
+                            },
+                            modifier = Modifier
+                                .padding(15.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .onGloballyPositioned { coordinates ->
+                                    textFieldSize = coordinates.size.toSize()
+                                },
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        uiState.errorDescripcion?.let {
+                            Text(
+                                text = it,
+                                color = Color.Red
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     OutlinedButton(
                         onClick = {
@@ -204,156 +274,11 @@ fun TicketBodyScreen(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Guardar Ticket"
                         )
-                        Text("Guardar")
+                        Text(
+                            text = if(ticketId == 0) "Crear Ticket" else "Modificar Ticket"
+                        )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun DatePickerField(
-    uiState: TicketUiState,
-    onEvent: (TicketUiEvent) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(uiState.fecha) }
-    var textFieldSize by remember { mutableStateOf(Size.Zero) }
-
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-
-    val icon = if (expanded) {
-        Icons.Filled.KeyboardArrowUp
-    } else {
-        Icons.Filled.KeyboardArrowDown
-    }
-
-    val context = LocalContext.current
-
-    LaunchedEffect(uiState.fecha) {
-        selectedDate = uiState.fecha
-    }
-
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        OutlinedTextField(
-            label = { Text("Fecha") },
-            value = selectedDate?.let { dateFormat.format(it) } ?: "Elija una fecha",
-            onValueChange = {/* No se necesita aquí, ya que es solo lectura */},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .onGloballyPositioned { coordinates ->
-                    textFieldSize = coordinates.size.toSize()
-                }
-                .clickable {
-                    expanded = true
-                },
-            shape = RoundedCornerShape(10.dp),
-            trailingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.clickable {
-                        expanded = !expanded
-                    }
-                )
-            },
-            readOnly = true
-        )
-
-        if (expanded) {
-            val calendar = Calendar.getInstance()
-            android.app.DatePickerDialog(
-                context,
-                { _, year, month, dayOfMonth ->
-                    calendar.set(year, month, dayOfMonth)
-                    val newDate = calendar.time
-                    selectedDate = newDate
-                    onEvent(TicketUiEvent.fechaChanged(newDate))
-                    expanded = false
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
-        }
-    }
-}
-
-
-@Composable
-fun DropDownMenu(
-    uiState: TicketUiState,
-    onEvent: (TicketUiEvent) -> Unit
-){
-    var expanded by remember { mutableStateOf(false) }
-    var selectItem by remember { mutableStateOf(uiState.prioriodadId.toString()) }
-    var textFielSize by remember { mutableStateOf(Size.Zero) }
-    val priorities = uiState.prioridades
-
-    val icon = if(expanded) {
-        Icons.Filled.KeyboardArrowUp
-    }else{
-        Icons.Filled.KeyboardArrowDown
-    }
-
-    LaunchedEffect(uiState.prioriodadId) {
-        selectItem = priorities.find { it.prioridadId == uiState.prioriodadId }?.descripcion ?: ""
-    }
-
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        OutlinedTextField(
-            label = {
-                Text("Prioridad")
-            },
-            value = selectItem,
-            onValueChange = { /* No se necesita aquí, ya que es solo lectura */ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .onGloballyPositioned { coordinates ->
-                    textFielSize = coordinates.size.toSize()
-                }
-                .clickable {
-                    expanded = true
-                },
-            shape = RoundedCornerShape(10.dp),
-            trailingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clickable { expanded = !expanded }
-                )
-            },
-            readOnly = true
-        )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.width(
-                with(LocalDensity.current) {
-                    textFielSize.width.toDp()
-                }
-            )
-        ) {
-            priorities.forEach { priority ->
-                DropdownMenuItem(
-                    onClick = {
-                        expanded = false
-                        selectItem = priority.descripcion
-                        onEvent(TicketUiEvent.prioridadIdChanged(priority.prioridadId.toString()))
-                    },
-                    text = {
-                        Text(text = priority.descripcion)
-                    }
-                )
             }
         }
     }

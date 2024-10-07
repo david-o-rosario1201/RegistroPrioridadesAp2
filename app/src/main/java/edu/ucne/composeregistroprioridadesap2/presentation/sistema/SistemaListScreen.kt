@@ -1,26 +1,25 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
-package edu.ucne.composeregistroprioridadesap2.presentation.prioridad
+package edu.ucne.composeregistroprioridadesap2.presentation.sistema
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -49,54 +48,43 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.composeregistroprioridadesap2.R
-import edu.ucne.composeregistroprioridadesap2.data.remote.dto.PrioridadDto
+import edu.ucne.composeregistroprioridadesap2.data.remote.dto.SistemaDto
 import edu.ucne.composeregistroprioridadesap2.ui.theme.RegistroPrioridadesAp2Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun PrioridadListScreen(
+fun SistemaListScreen(
     drawerState: DrawerState,
     scope: CoroutineScope,
-    viewModel: PrioridadViewModel = hiltViewModel(),
-    onPrioridadClick: (Int) -> Unit,
-    onAddPrioridad: () -> Unit
-){
+    viewModel: SistemaViewModel = hiltViewModel(),
+    onClickSistema: (Int) -> Unit,
+    onAddSistema: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    PrioridadListBodyScreen(
+    SistemaListBodyScreen(
         drawerState = drawerState,
         scope = scope,
         uiState = uiState,
-        onPrioridadClick = onPrioridadClick,
-        onAddPrioridad = onAddPrioridad,
-        onDeletePrioridad = { prioridadId ->
-            viewModel.onEvent(
-                PrioridadUiEvent.PrioridadIdChanged(prioridadId)
-            )
-            viewModel.onEvent(
-                PrioridadUiEvent.Delete
-            )
-        }
+        onClickSistema = onClickSistema,
+        onAddSistema = onAddSistema
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrioridadListBodyScreen(
+fun SistemaListBodyScreen(
     drawerState: DrawerState,
     scope: CoroutineScope,
-    uiState: PrioridadUiState,
-    onPrioridadClick: (Int) -> Unit,
-    onAddPrioridad: () -> Unit,
-    onDeletePrioridad: (Int) -> Unit
-){
+    uiState: SistemaUiState,
+    onClickSistema: (Int) -> Unit,
+    onAddSistema: () -> Unit
+) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Lista de Prioridades",
+                        text = "Lista de Sistemas",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -119,57 +107,33 @@ fun PrioridadListBodyScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddPrioridad
+                onClick = onAddSistema
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Agregar nueva prioridad"
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Crear Nuevo Sistema"
                 )
             }
         }
-    ){
+    ){ innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
-                .padding(
-                    start = 15.dp,
-                    end = 15.dp
-                )
+                .padding(innerPadding)
+                .padding(horizontal = 15.dp)
         ){
-            Spacer(modifier = Modifier.height(32.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ){
-                if(uiState.prioridades.isEmpty()){
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillParentMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ){
-                            Image(
-                                painter = painterResource(R.drawable.empty_icon),
-                                contentDescription = "Lista vacía"
-                            )
-                            Text(
-                                text = "Lista vacía",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }else{
-                    items(uiState.prioridades){
-                        PrioridadRow(
-                            it = it,
-                            onPrioridadClick = onPrioridadClick,
-                            onDeletePrioridad = onDeletePrioridad
-                        )
-                    }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(uiState.sistemas) {
+                    SistemaRow(
+                        it = it,
+                        onClickSistema = onClickSistema
+                    )
                 }
             }
         }
@@ -177,36 +141,34 @@ fun PrioridadListBodyScreen(
 }
 
 @Composable
-fun PrioridadRow(
-    it: PrioridadDto,
-    onPrioridadClick: (Int) -> Unit,
-    onDeletePrioridad: (Int) -> Unit
+fun SistemaRow(
+    it: SistemaDto,
+    onClickSistema: (Int) -> Unit
 ) {
     Card(
         onClick = {
-            onPrioridadClick(it.prioridadId ?: 0)
+            onClickSistema(it.sistemaId ?: 0)
         },
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFB0BEC5)
         ),
         modifier = Modifier
-            .padding(top = 20.dp)
-            .fillMaxWidth()
-            .heightIn(min = 100.dp)
+            .padding(8.dp)
+            .width(150.dp)
+            .height(150.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
+                .fillMaxSize()
+                .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.priority_image),
-                contentDescription = "Image Prioridad",
+                painter = painterResource(R.drawable.sistema_image),
+                contentDescription = "Imagen Sistema",
                 modifier = Modifier
-                    .padding(vertical = 20.dp)
-                    .size(96.dp)
-                    .clip(RoundedCornerShape(10.dp)),
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -214,31 +176,14 @@ fun PrioridadRow(
 
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
             ) {
                 Text(
-                    text = "Descripción: ${it.descripcion}",
-                    style = MaterialTheme.typography.titleLarge
+                    text = "Nombre: ",
+                    style = MaterialTheme.typography.headlineMedium
                 )
-
                 Text(
-                    text = "Días de compromiso: ${it.diasCompromiso}",
+                    text = it.nombre,
                     style = MaterialTheme.typography.titleLarge
-                )
-            }
-
-            IconButton(
-                onClick = {
-                    onDeletePrioridad(it.prioridadId ?: 0)
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar Prioridad"
                 )
             }
         }
@@ -247,16 +192,16 @@ fun PrioridadRow(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PrioridadListScreenPreview(){
+fun SistemaListScreenPreview(){
     RegistroPrioridadesAp2Theme {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
 
-        PrioridadListScreen(
+        SistemaListScreen(
             drawerState = drawerState,
             scope = scope,
-            onPrioridadClick = {},
-            onAddPrioridad = {}
+            onClickSistema = {},
+            onAddSistema = {}
         )
     }
 }

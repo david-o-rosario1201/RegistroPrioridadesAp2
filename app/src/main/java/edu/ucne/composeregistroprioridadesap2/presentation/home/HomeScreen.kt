@@ -109,6 +109,25 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     CardHome(
+                        painter = painterResource(id = R.drawable.sistema_background),
+                        contentDescription = "Sistema List",
+                        title = "Sistema List",
+                        route = Route.SISTEMA,
+                        navController = navHostController
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    CardHome(
+                        painter = painterResource(id = R.drawable.cliente_fondo),
+                        contentDescription = "Cliente List",
+                        title = "Cliente List",
+                        route = Route.CLIENTE,
+                        navController = navHostController
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    CardHome(
                         painter = painterResource(id = R.drawable.ticket_background),
                         contentDescription = "Ticket List",
                         title = "Ticket List",
@@ -138,6 +157,10 @@ fun CardHome(
                     navController.navigate(Screen.PrioridadListScreen)
                 if(route == Route.TICKET)
                     navController.navigate(Screen.TicketListScreen)
+                if(route == Route.SISTEMA)
+                    navController.navigate(Screen.SistemaListScreen)
+                if(route == Route.CLIENTE)
+                    navController.navigate(Screen.ClienteListScreen)
             },
         shape = RoundedCornerShape(15.dp)
     ){

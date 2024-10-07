@@ -5,12 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.Icon
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import edu.ucne.composeregistroprioridadesap2.presentation.navigation.RegistroPrioridadesAp2NavHost
@@ -54,6 +59,18 @@ fun BuildNavigationItems(taskCount: Int): List<NavigationItem>{
             selectedIcon = Icons.Filled.Star,
             unselectedIcon = Icons.Outlined.Star,
             route = Route.TICKET
+        ),
+        NavigationItem(
+            title = "Sistemas",
+            selectedIcon = Icons.Filled.List,
+            unselectedIcon = Icons.Outlined.List,
+            route = Route.SISTEMA
+        ),
+        NavigationItem(
+            title = "Clientes",
+            selectedIcon = Icons.Filled.Face,
+            unselectedIcon = Icons.Outlined.Face,
+            route = Route.CLIENTE
         )
     )
 }
@@ -61,5 +78,7 @@ fun BuildNavigationItems(taskCount: Int): List<NavigationItem>{
 enum class Route{
     HOME,
     PRIORIDAD,
-    TICKET
+    TICKET,
+    SISTEMA,
+    CLIENTE
 }
