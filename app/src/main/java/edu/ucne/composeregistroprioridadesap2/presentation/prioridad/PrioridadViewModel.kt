@@ -77,8 +77,8 @@ class PrioridadViewModel @Inject constructor(
             PrioridadUiEvent.Save -> {
                 viewModelScope.launch {
                     val prioridadBuscada = prioridadRepository.getPrioridades()
-                        .filter { prioridad ->
-                            prioridad.descripcion.contains(_uiState.value.descripcion.toString())
+                        .find { prioridad ->
+                            prioridad.descripcion.lowercase() == _uiState.value.descripcion?.lowercase()
                         }
 
                     if(_uiState.value.descripcion.isNullOrEmpty()){
@@ -86,7 +86,7 @@ class PrioridadViewModel @Inject constructor(
                             it.copy(errorDescripcion = "Este campo no puede estar vacío")
                         }
                     }
-                    else if(prioridadBuscada.isNotEmpty()){
+                    else if(prioridadBuscada != null && _uiState.value.prioridadId != prioridadBuscada.prioridadId){
                         _uiState.update {
                             it.copy(errorDescripcion = "Ya existe una prioridad con esta descripción")
                         }
